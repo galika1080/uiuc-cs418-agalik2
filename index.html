@@ -93,7 +93,7 @@ void main() {
   vec3 stadium = vec3(texture(uSampler2, uv_env));
   vec3 white = vec3(1.0, 1.0, 1.0);
 
-  outColor = vec4((0.2 * stadium) + (0.4 * white * specular * (shininess.x)) + (0.4 * shininess * diffuse), 1.0);
+  outColor = vec4((0.2 * stadium * shininess.x) + (0.4 * white * specular * shininess.x) + (0.4 * shininess * diffuse), 1.0);
 }
 `;
 
