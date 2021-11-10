@@ -85,8 +85,7 @@ void main() {
   vec3 white = vec3(1.0, 1.0, 1.0);
 
 
-  outColor = vec4(diffuse * illinois * 0.35 + stadium * 0.15 + white * 0.5 * specular, 1.0);
-
+  outColor = vec4((diffuse * illinois * 0.4) + (stadium * 0.2) + (white * 0.4 * specular), 1.0);
 }
 `;
 
@@ -172,17 +171,41 @@ function initwebgl() {
   // replaced by actual texture image once loaded
   //
 
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
-                gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
+  var procgen = new Uint8Array(1048576);
+  for (var i = 0; i < 512; i++) {
+    for (var j = 0; j < 512; j++) {
+      var r = 4*(512 * i + j);
+      var g = r + 1;
+      var b = r + 2;
+      var a = r + 3;
 
-  var image = new Image();
+      procgen[r] = 255 * (0.5 + 0.5*Math.cos(i / 50));
+      procgen[g] = 255 * (0.5 + 0.5*Math.cos(j / 50));
+      procgen[b] = 255 * (j / 512);
+
+      
+      if ((i-j) % 20 < 10 && (i+j) % 20 < 10) {
+        if (procgen[r] >= 20) {
+          procgen[r] -= 20;
+        }
+      }
+
+      procgen[a] = 255;
+    }
+  }
+
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, procgen);
+  gl.generateMipmap(gl.TEXTURE_2D);
+
+  /*var image = new Image();
   image.src = "illinois512.png";
 
   image.addEventListener("load", function() {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.generateMipmap(gl.TEXTURE_2D);
-  });
+  });*/
 
   //
   // set up second texture and sampler
