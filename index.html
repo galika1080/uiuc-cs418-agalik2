@@ -185,7 +185,7 @@ function initwebgl() {
 
   image2.addEventListener("load", function() {
     gl.bindTexture(gl.TEXTURE_2D, texture2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 256, 0, gl.RGBA, gl.UNSIGNED_BYTE, image2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2750, 2750, 0, gl.RGBA, gl.UNSIGNED_BYTE, image2);
     gl.generateMipmap(gl.TEXTURE_2D);
   });
 
