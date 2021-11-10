@@ -32,7 +32,7 @@ uniform mat3 uNormalMatrix;
 uniform mat4 uProjectionMatrix;
 
 out vec3 n, l, v;
-out vec2 uv;
+out vec2 uv_base;
 
 void main() {
   n = normalize(uNormalMatrix*aVertexNormal);
@@ -40,8 +40,8 @@ void main() {
   vec4 p = uModelViewMatrix*vec4(aVertexPosition, 1.0);
   v = normalize(-p.xyz);
 
-  uv.s = aVertexPosition.x + 0.5;
-  uv.t = aVertexPosition.y + 0.5;
+  uv_base.s = aVertexPosition.x + 0.5;
+  uv_base.t = aVertexPosition.y + 0.5;
 
   gl_Position = uProjectionMatrix*uModelViewMatrix*vec4(aVertexPosition, 1.0);
 }
@@ -56,7 +56,7 @@ var fs = `#version 300 es
 precision mediump float;
 
 in vec3 n, l, v;
-in vec2 uv;
+in vec2 uv_base;
 
 uniform sampler2D uSampler;
 uniform sampler2D uSampler2;
@@ -75,12 +75,17 @@ void main() {
    specular = specular * specular_base;
   }
 
+
+  vec2 uv_env;
+  uv_env.s = (n.x + 1.0) / 2.0;
+  uv_env.t = (n.y + 1.0) / 2.0;
+
+  vec3 illinois = vec3(texture(uSampler, uv_base));
+  vec3 stadium = vec3(texture(uSampler2, uv_env));
   vec3 white = vec3(1.0, 1.0, 1.0);
 
-  vec3 illinois = vec3(texture(uSampler, uv));
-  vec3 stadium = vec3(texture(uSampler2, uv));
 
-  outColor = vec4(stadium * 0.5 * diffuse + white * 0.5 * specular, 1.0);
+  outColor = vec4(diffuse * illinois * 0.35 + stadium * 0.15 + white * 0.5 * specular, 1.0);
 
 }
 `;
