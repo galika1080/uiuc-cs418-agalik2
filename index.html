@@ -40,7 +40,14 @@ void main() {
   vec4 p = uModelViewMatrix*vec4(aVertexPosition, 1.0);
   v = normalize(-p.xyz);
 
-  uv_base.s = aVertexPosition.x + 0.5;
+  float theta = atan(aVertexPosition.x / aVertexPosition.z);
+  
+  uv_base.s = 0.5 + 0.5*(theta/3.141592);
+
+  if (aVertexPosition.z < 0.0) {
+    uv_base.s = 1.0 + 0.5*(theta/3.141592);
+  }
+
   uv_base.t = aVertexPosition.y + 0.5;
 
   gl_Position = uProjectionMatrix*uModelViewMatrix*vec4(aVertexPosition, 1.0);
@@ -68,10 +75,13 @@ void main() {
   float diffuse = max( dot(nn, l), 0.0 );
   vec3 red = vec3(1.0, 0.0, 0.0);
   
+  vec3 shininess = vec3(texture(uSampler, uv_base));
+
   vec3 exigent = reflect(-l, nn);
   float specular_base = max( dot(v, exigent), 0.0 );
-  float specular = 1.0;
-  for (int i = 0; i < 40; i++) {
+  float specular = specular_base;
+
+  for (int i = 0; i < int(40.0); i++) {
    specular = specular * specular_base;
   }
 
@@ -80,12 +90,10 @@ void main() {
   uv_env.s = (n.x + 1.0) / 2.0;
   uv_env.t = (n.y + 1.0) / 2.0;
 
-  vec3 illinois = vec3(texture(uSampler, uv_base));
   vec3 stadium = vec3(texture(uSampler2, uv_env));
   vec3 white = vec3(1.0, 1.0, 1.0);
 
-
-  outColor = vec4((diffuse * illinois * 0.4) + (stadium * 0.2) + (white * 0.4 * specular), 1.0);
+  outColor = vec4((0.2 * stadium) + (0.4 * white * specular * (shininess.x)) + (0.4 * shininess * diffuse), 1.0);
 }
 `;
 
@@ -179,15 +187,23 @@ function initwebgl() {
       var b = r + 2;
       var a = r + 3;
 
-      procgen[r] = 255 * (0.5 + 0.5*Math.cos(i / 50));
-      procgen[g] = 255 * (0.5 + 0.5*Math.cos(j / 50));
-      procgen[b] = 255 * (j / 512);
+      procgen[r] = 255;
+      procgen[g] = 255;
+      procgen[b] = 255;
 
       
-      if ((i-j) % 20 < 10 && (i+j) % 20 < 10) {
-        if (procgen[r] >= 20) {
-          procgen[r] -= 20;
-        }
+      if ((j-i) % 80 < 40 && (i+j) % 80 < 40) {
+        //if (procgen[r] >= 255) {
+          procgen[r] = 0;
+        //}
+
+        //if (procgen[g] >= 255) {
+          procgen[g] = 20;
+        //}
+
+        //if (procgen[b] >= 255) {
+          procgen[b] = 180;
+        //}
       }
 
       procgen[a] = 255;
